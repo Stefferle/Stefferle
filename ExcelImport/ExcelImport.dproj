@@ -1,3 +1,4 @@
+<<<<<<< .merge_file_Erx2Jg
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{7E4B2F91-3A5C-4D8E-B2F6-1A9C3E7D5B8A}</ProjectGuid>
@@ -60,4 +61,116 @@
     <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\Studio\$(ProductVersion)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\Studio\$(ProductVersion)\UserTools.proj')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+=======
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ── Identité du projet ───────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <ProjectGuid>{7E4B2F91-3A5C-4D8E-B2F6-1A9C3E7D5B8A}</ProjectGuid>
+    <MainSource>ExcelImport.dpr</MainSource>
+    <ProjectVersion>20.1</ProjectVersion>
+    <FrameworkType>VCL</FrameworkType>
+    <AppType>Application</AppType>
+    <!-- Base=True doit être dans ce groupe pour que le groupe Base ci-dessous soit évalué -->
+    <Base>True</Base>
+    <Config Condition="'$(Config)'==''">Debug</Config>
+    <Platform Condition="'$(Platform)'==''">Win32</Platform>
+    <!-- 1 = Win32 uniquement (ACE OLEDB 32 bits) -->
+    <TargetedPlatforms>1</TargetedPlatforms>
+  </PropertyGroup>
+
+  <!-- ── Options communes héritées par Debug ET Release ──────────────────── -->
+  <PropertyGroup Condition="'$(Base)'!=''">
+    <!--
+      Packages runtime :
+        vcl, rtl    → VCL + RTL
+        vclimg      → contrôles visuels (TProgressBar…)
+        FireDAC     → connexion Firebird
+        adortl      → TADOConnection (ExcelReader / ACE OLEDB)
+        dbrtl       → TDataSet
+    -->
+    <DCC_UsePackage>vcl;rtl;vclimg;vclwinx;FireDAC;adortl;dbrtl;$(DCC_UsePackage)</DCC_UsePackage>
+    <!--
+      Chemins de recherche des unités (relatifs au dossier du .dproj).
+      Delphi cherche d'abord dans ces dossiers avant la bibliothèque système.
+    -->
+    <DCC_UnitSearchPath>Core;Importers;Forms;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+    <!-- Namespaces implicites (permet SysUtils au lieu de System.SysUtils) -->
+    <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+    <DCC_IOChecks>True</DCC_IOChecks>
+    <DCC_WriteableConst>False</DCC_WriteableConst>
+    <DCC_Hints>True</DCC_Hints>
+    <DCC_Warnings>True</DCC_Warnings>
+    <DCC_Align>8</DCC_Align>
+    <DCC_E>False</DCC_E>
+    <DCC_F>False</DCC_F>
+    <DCC_K>False</DCC_K>
+    <DCC_N>False</DCC_N>
+    <DCC_S>False</DCC_S>
+  </PropertyGroup>
+
+  <!-- ── Debug / Win32 ────────────────────────────────────────────────────── -->
+  <PropertyGroup Condition="'$(Config)'=='Debug' and '$(Platform)'=='Win32'">
+    <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+    <DCC_DebugInformation>2</DCC_DebugInformation>
+    <DCC_RemoteDebug>False</DCC_RemoteDebug>
+    <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+    <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+    <DCC_BplOutput>.\$(Platform)\$(Config)</DCC_BplOutput>
+    <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
+    <Manifest_File>None</Manifest_File>
+  </PropertyGroup>
+
+  <!-- ── Release / Win32 ──────────────────────────────────────────────────── -->
+  <PropertyGroup Condition="'$(Config)'=='Release' and '$(Platform)'=='Win32'">
+    <DCC_Optimize>True</DCC_Optimize>
+    <DCC_GenerateStackFrames>False</DCC_GenerateStackFrames>
+    <DCC_DebugInformation>0</DCC_DebugInformation>
+    <DCC_RemoteDebug>False</DCC_RemoteDebug>
+    <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+    <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+    <DCC_BplOutput>.\$(Platform)\$(Config)</DCC_BplOutput>
+    <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
+    <Manifest_File>None</Manifest_File>
+  </PropertyGroup>
+
+  <!-- ── Fichiers sources ──────────────────────────────────────────────────── -->
+  <ItemGroup>
+    <DelphiCompile Include="ExcelImport.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <DCCReference Include="Forms\MainForm.pas">
+      <Form>FormMain</Form>
+    </DCCReference>
+    <DCCReference Include="Core\ImportTypes.pas"/>
+    <DCCReference Include="Core\ImportLog.pas"/>
+    <DCCReference Include="Core\ImportContext.pas"/>
+    <DCCReference Include="Core\ExcelReader.pas"/>
+    <DCCReference Include="Core\DbHelpers.pas"/>
+    <DCCReference Include="Core\BaseImporter.pas"/>
+    <DCCReference Include="Importers\ImportOrchestrator.pas"/>
+    <DCCReference Include="Importers\ImportEngagements.pas"/>
+  </ItemGroup>
+
+  <!-- ── Extensions Embarcadero ───────────────────────────────────────────── -->
+  <ProjectExtensions>
+    <BorlandProject>
+      <Delphi.Personality>
+        <Source>
+          <Source Name="MainSource">ExcelImport.dpr</Source>
+        </Source>
+        <Excluded_Packages/>
+      </Delphi.Personality>
+    </BorlandProject>
+  </ProjectExtensions>
+
+  <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets"
+          Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+  <Import Project="$(APPDATA)\Embarcadero\Studio\$(ProductVersion)\UserTools.proj"
+          Condition="Exists('$(APPDATA)\Embarcadero\Studio\$(ProductVersion)\UserTools.proj')"/>
+
+>>>>>>> .merge_file_UyA0nX
 </Project>
