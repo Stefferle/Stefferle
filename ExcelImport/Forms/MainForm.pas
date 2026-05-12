@@ -1,4 +1,4 @@
-unit MainForm;
+﻿unit MainForm;
 
 {$SCOPEDENUMS ON}
 
@@ -10,7 +10,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.FileCtrl, Vcl.Menus,
   FireDAC.Comp.Client, FireDAC.Phys.FB,
-  ImportLog, ImportContext, ImportOrchestrator;
+  ImportLog, ImportContext, ImportOrchestrator, ImportTypes;
 
 type
   TFormMain = class(TForm)

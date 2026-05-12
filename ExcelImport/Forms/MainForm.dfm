@@ -1,56 +1,92 @@
 object FormMain: TFormMain
   Left = 0
   Top = 0
-  Caption = 'Import Excel'#$2192'Firebird'
-  ClientHeight = 620
-  ClientWidth = 860
+  Margins.Left = 5
+  Margins.Top = 5
+  Margins.Right = 5
+  Margins.Bottom = 5
+  Caption = 'Import Excel'#8594'Firebird'
+  ClientHeight = 1085
+  ClientWidth = 1519
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -13
+  Font.Height = -23
   Font.Name = 'Segoe UI'
   Font.Style = []
   Menu = AppMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
+  PixelsPerInch = 168
+  TextHeight = 31
+  object LabelStatus: TLabel
+    Left = 21
+    Top = 170
+    Width = 46
+    Height = 31
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    Caption = 'Pr'#234't.'
+  end
   object PanelTop: TPanel
     Left = 0
     Top = 0
-    Width = 860
-    Height = 80
+    Width = 1519
+    Height = 140
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
     object LabelPath: TLabel
-      Left = 12
-      Top = 14
-      Width = 139
-      Height = 17
+      Left = 21
+      Top = 25
+      Width = 265
+      Height = 31
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Dossier des fichiers Excel :'
     end
     object EditDataPath: TEdit
-      Left = 12
-      Top = 36
-      Width = 620
-      Height = 25
+      Left = 21
+      Top = 63
+      Width = 1085
+      Height = 39
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       TabOrder = 0
     end
     object BtnBrowse: TButton
-      Left = 642
-      Top = 34
-      Width = 90
-      Height = 29
-      Caption = 'Parcourir'#$2026
+      Left = 1124
+      Top = 60
+      Width = 157
+      Height = 50
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'Parcourir'#8230
       TabOrder = 1
       OnClick = BtnBrowseClick
     end
     object BtnStart: TButton
-      Left = 746
-      Top = 34
-      Width = 100
-      Height = 29
-      Caption = 'D'#$00E9'marrer'
+      Left = 1306
+      Top = 60
+      Width = 175
+      Height = 50
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'D'#233'marrer'
       Default = True
       TabOrder = 2
       OnClick = BtnStartClick
@@ -58,28 +94,29 @@ object FormMain: TFormMain
   end
   object ProgressBar: TProgressBar
     Left = 0
-    Top = 80
-    Width = 860
-    Height = 10
+    Top = 140
+    Width = 1519
+    Height = 18
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     TabOrder = 1
   end
-  object LabelStatus: TLabel
-    Left = 12
-    Top = 97
-    Width = 200
-    Height = 17
-    Caption = 'Pr'#$00EA't.'
-  end
   object MemoLog: TMemo
     Left = 0
-    Top = 120
-    Width = 860
-    Height = 500
+    Top = 210
+    Width = 1519
+    Height = 875
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alBottom
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
+    Font.Height = -21
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
@@ -94,7 +131,7 @@ object FormMain: TFormMain
     object MenuOptions: TMenuItem
       Caption = 'Options'
       object MenuConfigDb: TMenuItem
-        Caption = 'Param'#$00E8'tres DB'#$2026
+        Caption = 'Param'#232'tres DB'#8230
         OnClick = MenuConfigDbClick
       end
     end
