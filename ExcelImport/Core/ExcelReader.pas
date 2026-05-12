@@ -37,7 +37,7 @@ function XlKey(DS: TDataSet; const ACol: string): string;
 implementation
 
 uses
-  System.StrUtils, ADODB;
+  System.StrUtils, Data.Win.ADODB;
 
 constructor TExcelReader.Create(const AFilename: string);
 begin
