@@ -19,13 +19,11 @@ type
   TImportOrchestrator = class
   private
     FContext     : TImportContext;
-    FDataPath    : string; // dossier contenant les fichiers Excel
+    FDataPath    : string;
     FTotalErrors : Integer;
     procedure RunImporter(AImporter: TBaseImporter);
   public
     constructor Create(AContext: TImportContext; const ADataPath: string);
-
-    // Lance l'import complet, retourne le nombre total d'erreurs
     function Execute: Integer;
   end;
 
@@ -33,14 +31,11 @@ implementation
 
 uses
   ImportTypes,
-  ImportFournisseurs,
-  ImportTableDiscriminee
-  // Ajoutez vos autres importeurs ici :
-  // ImportClients,
-  // ImportContrats,
+  ImportEngagements
+  // À ajouter ultérieurement :
+  // ImportMarches,
+  // ImportAccordsCadres,
   ;
-
-{ TImportOrchestrator }
 
 constructor TImportOrchestrator.Create(AContext: TImportContext; const ADataPath: string);
 begin
@@ -52,8 +47,7 @@ end;
 
 procedure TImportOrchestrator.RunImporter(AImporter: TBaseImporter);
 begin
-  FContext.Log.Log('Orchestrator',
-    Format('▶ Début : %s', [AImporter.SourceName]));
+  FContext.Log.Log('Orchestrator', Format('▶ Début : %s', [AImporter.SourceName]));
   try
     AImporter.Execute;
     Inc(FTotalErrors, AImporter.Stats.Errors);
@@ -76,23 +70,17 @@ var
 begin
   FTotalErrors := 0;
 
-  // ── Étape 1 : tables de référence / pas de dépendances ──────────────────
-  LImporter := TImportFournisseurs.Create(FContext, FDataPath + 'Fournisseurs.xlsx');
+  // ── Engagements EJ ────────────────────────────────────────────────────────
+  LImporter := TImportEngagements.Create(FContext, FDataPath + 'EJ.xlsx');
   try RunImporter(LImporter); finally LImporter.Free; end;
 
-  // Ajoutez ici les autres tables sans dépendances (ex: Clients, Sites, ...)
-
-  // ── Étape 2 : entités dépendant des tables de référence ─────────────────
-  // LImporter := TImportClients.Create(FContext, FDataPath + 'Clients.xlsx');
+  // ── Marchés (après EJ pour la résolution FK) ──────────────────────────────
+  // LImporter := TImportMarches.Create(FContext, FDataPath + 'MAR.xlsx');
   // try RunImporter(LImporter); finally LImporter.Free; end;
 
-  // ── Étape 3 : table discriminée — phase 1 (insertions) ──────────────────
-  LImporter := TImportObjetsMetier.Create(FContext, FDataPath + 'ObjetsMetier.xlsx');
-  try RunImporter(LImporter); finally LImporter.Free; end;
-
-  // ── Étape 4 : table discriminée — phase 2 (résolution FK internes) ───────
-  LImporter := TResoudreFK.Create(FContext, FDataPath + 'ObjetsMetier.xlsx');
-  try RunImporter(LImporter); finally LImporter.Free; end;
+  // ── Accords-Cadres ────────────────────────────────────────────────────────
+  // LImporter := TImportAccordsCadres.Create(FContext, FDataPath + 'AC.xlsx');
+  // try RunImporter(LImporter); finally LImporter.Free; end;
 
   Result := FTotalErrors;
 end;
