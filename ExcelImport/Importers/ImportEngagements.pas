@@ -48,8 +48,8 @@ implementation
 
 uses
   System.SysUtils, System.Variants, System.Generics.Collections, System.Math,
-  Data.DB,
-  ExcelReader, DbHelpers, ImportTypes, ImportContext;
+  Data.DB, FireDAC.Comp.Client,
+  ExcelReader, DbHelpers, ImportTypes;
 
 const
   SHEET_NAME  = 'Feuille de calcul 1';
