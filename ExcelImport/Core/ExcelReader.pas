@@ -1,4 +1,4 @@
-unit ExcelReader;
+﻿unit ExcelReader;
 
 {
   Lecture Excel via ADO / Microsoft ACE OLEDB 12.0.
@@ -37,7 +37,7 @@ function XlKey(DS: TDataSet; const ACol: string): string;
 implementation
 
 uses
-  System.StrUtils, Data.Win.ADODB;
+  System.StrUtils;
 
 constructor TExcelReader.Create(const AFilename: string);
 begin
