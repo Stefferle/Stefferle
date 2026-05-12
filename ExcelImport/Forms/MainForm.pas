@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, System.IniFiles,
   Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.FileCtrl, Vcl.Menus,
-  FireDAC.Comp.Client, FireDAC.Drivers.FB,
+  FireDAC.Comp.Client, FireDAC.Phys.FB,
   ImportLog, ImportContext, ImportOrchestrator;
 
 type
