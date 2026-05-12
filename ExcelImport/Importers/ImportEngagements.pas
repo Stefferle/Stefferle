@@ -1,4 +1,4 @@
-unit ImportEngagements;
+﻿unit ImportEngagements;
 
 {$SCOPEDENUMS ON}
 
@@ -25,7 +25,7 @@ unit ImportEngagements;
 interface
 
 uses
-  BaseImporter, ImportContext;
+  BaseImporter, ImportContext, FireDAC.DApt, FireDAC.Stan.Async;
 
 type
   TImportEngagements = class(TBaseImporter)
