@@ -1,7 +1,7 @@
 object FormMain: TFormMain
   Left = 0
   Top = 0
-  Caption = 'Import Excel → Firebird'
+  Caption = 'Import Excel'#$2192'Firebird'
   ClientHeight = 620
   ClientWidth = 860
   Color = clBtnFace
@@ -10,6 +10,7 @@ object FormMain: TFormMain
   Font.Height = -13
   Font.Name = 'Segoe UI'
   Font.Style = []
+  Menu = AppMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -40,7 +41,7 @@ object FormMain: TFormMain
       Top = 34
       Width = 90
       Height = 29
-      Caption = 'Parcourir…'
+      Caption = 'Parcourir'#$2026
       TabOrder = 1
       OnClick = BtnBrowseClick
     end
@@ -49,7 +50,7 @@ object FormMain: TFormMain
       Top = 34
       Width = 100
       Height = 29
-      Caption = 'Démarrer'
+      Caption = 'D'#$00E9'marrer'
       Default = True
       TabOrder = 2
       OnClick = BtnStartClick
@@ -68,7 +69,7 @@ object FormMain: TFormMain
     Top = 97
     Width = 200
     Height = 17
-    Caption = 'Prêt.'
+    Caption = 'Pr'#$00EA't.'
   end
   object MemoLog: TMemo
     Left = 0
@@ -86,5 +87,16 @@ object FormMain: TFormMain
     ScrollBars = ssVertical
     TabOrder = 2
     WordWrap = False
+  end
+  object AppMenu: TMainMenu
+    Left = 400
+    Top = 10
+    object MenuOptions: TMenuItem
+      Caption = 'Options'
+      object MenuConfigDb: TMenuItem
+        Caption = 'Param'#$00E8'tres DB'#$2026
+        OnClick = MenuConfigDbClick
+      end
+    end
   end
 end

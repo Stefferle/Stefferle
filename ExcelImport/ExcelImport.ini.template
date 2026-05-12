@@ -1,0 +1,20 @@
+; ExcelImport.ini — Configuration de la connexion Firebird
+;
+; INSTRUCTIONS :
+;   1. Copier ce fichier sous le nom ExcelImport.ini (sans .template)
+;      dans le même dossier que ExcelImport.exe
+;   2. Adapter les valeurs ci-dessous
+;   3. Ne PAS commiter ExcelImport.ini dans git (il contient le mot de passe)
+;      → il est listé dans .gitignore
+;
+; Vous pouvez aussi utiliser Options > Paramètres DB… dans l'application.
+
+[Database]
+File=C:\Databases\MaBase.fdb
+User=SYSDBA
+Password=masterkey
+Charset=UTF8
+
+[App]
+; Dernier dossier Excel sélectionné (rempli automatiquement par l'application)
+DataPath=

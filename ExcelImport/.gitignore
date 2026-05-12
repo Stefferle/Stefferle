@@ -1,0 +1,19 @@
+# Fichier de configuration (contient le mot de passe DB)
+ExcelImport.ini
+
+# Sorties de compilation Delphi
+Win32/
+Win64/
+*.dcu
+*.dpu
+*.exe
+*.map
+
+# Fichiers temporaires Delphi IDE
+*.~*
+*.identcache
+*.projdata
+*.stat
+*.local
+__history/
+__recovery/
