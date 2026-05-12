@@ -16,20 +16,13 @@ type
     FSourceName: string;
 
     procedure Log(const AMsg: string; ALevel: TLogLevel = TLogLevel.Info);
-
-    // Log spécifique à une ligne (inclut la clé Excel dans le message)
     procedure LogRow(const AExcelKey, AMsg: string;
       ALevel: TLogLevel = TLogLevel.Info);
-
-    // Encapsule une procédure dans une transaction Firebird
     procedure InTransaction(AProc: TProc);
 
   public
     constructor Create(AContext: TImportContext; const ASourceName: string);
-
-    // Point d'entrée — à surcharger dans chaque importer
     procedure Execute; virtual; abstract;
-
     property Stats     : TImportStats read FStats;
     property SourceName: string       read FSourceName;
   end;

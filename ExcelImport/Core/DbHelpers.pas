@@ -18,28 +18,20 @@ uses
   System.SysUtils, System.Variants,
   FireDAC.Comp.Client;
 
-// Exécute une requête DML avec paramètres nommés (paires nom/valeur)
 procedure DbExec(Conn: TFDConnection; const ASQL: string;
   const AParams: array of Variant);
 
-// Retourne le premier champ de la première ligne, ou Null si aucune ligne
 function DbScalar(Conn: TFDConnection; const ASQL: string;
   const AParams: array of Variant): Variant;
 
-// Retourne vrai si au moins une ligne correspond à la requête
 function DbExists(Conn: TFDConnection; const ASQL: string;
   const AParams: array of Variant): Boolean;
 
-// Lit et incrémente GO_CHRONO pour la clé globale donnée.
-//   ADocument = '-1'  → CHRONO document (PK GO_ENTETE)
-//   ADocument = 'EN'  → numéro ENGAGEMENT logique
-// Lève une exception si la ligne GO_CHRONO est absente.
 function GoNextChrono(Conn: TFDConnection; const ADocument: string): Integer;
 
 implementation
 
 const
-  // Clé de la ligne GO_CHRONO utilisée pour les compteurs globaux
   GC_ENTREPRISE = -1;
   GC_DOSSIER    = -1;
   GC_ANNEE      = -1;
@@ -49,7 +41,7 @@ const
     'SELECT CHRONO FROM GO_CHRONO ' +
     'WHERE ENTREPRISE = :ENT AND DOSSIER = :DOS AND ' +
     '      ANNEE = :ANN AND MOIS = :MOS AND DOCUMENT = :DOC ' +
-    'WITH LOCK';                          // verrou optimiste Firebird
+    'WITH LOCK';
 
   SQL_CHRONO_UPDATE =
     'UPDATE GO_CHRONO SET CHRONO = :NEW_CHRONO ' +
@@ -120,7 +112,6 @@ begin
   try
     Q.Connection := Conn;
 
-    // Lecture avec verrou de la ligne GO_CHRONO
     Q.SQL.Text := SQL_CHRONO_READ;
     Q.ParamByName('ENT').AsInteger := GC_ENTREPRISE;
     Q.ParamByName('DOS').AsInteger := GC_DOSSIER;
@@ -139,7 +130,6 @@ begin
 
     Result := LCurrent + 1;
 
-    // Écriture de la nouvelle valeur
     Q.SQL.Text := SQL_CHRONO_UPDATE;
     Q.ParamByName('NEW_CHRONO').AsInteger := Result;
     Q.ParamByName('ENT').AsInteger        := GC_ENTREPRISE;

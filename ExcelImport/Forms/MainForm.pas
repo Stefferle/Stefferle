@@ -72,11 +72,9 @@ end;
 
 procedure TFormMain.AppendLog(const ALine: string);
 begin
-  // Peut être appelé depuis un thread — PostMessage pour sécurité
   TThread.Synchronize(nil, procedure
   begin
     MemoLog.Lines.Add(ALine);
-    // Scroll automatique vers la dernière ligne
     SendMessage(MemoLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
   end);
 end;
@@ -86,7 +84,7 @@ begin
   BtnStart.Enabled    := not ARunning;
   BtnBrowse.Enabled   := not ARunning;
   EditDataPath.Enabled:= not ARunning;
-  ProgressBar.Style   := TProgressBarStyle(Ord(ARunning)); // pbstMarquee quand actif
+  ProgressBar.Style   := TProgressBarStyle(Ord(ARunning));
   if not ARunning then
     ProgressBar.Style := pbstNormal;
 end;
@@ -127,14 +125,14 @@ begin
       FormatDateTime('yyyymmdd_hhnnss', Now) + '_import.log';
     LLog := TImportLog.Create(LLogFile);
     try
-      LLog.OnNewLine := AppendLog; // affichage en temps réel dans le Memo
+      LLog.OnNewLine := AppendLog;
 
       try
         SetupConnection;
       except
         on E: Exception do
         begin
-          LLog.Log('Connexion', 'Impossible d'ouvrir la base: ' + E.Message,
+          LLog.Log('Connexion', 'Impossible d''ouvrir la base: ' + E.Message,
             TLogLevel.Error);
           TThread.Synchronize(nil, procedure
           begin
@@ -168,7 +166,7 @@ begin
       end);
 
     finally
-      LLog.Free; // sauvegarde le fichier .log
+      LLog.Free;
     end;
   end).Start;
 end;

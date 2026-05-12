@@ -23,32 +23,21 @@ type
     constructor Create(const AFilename: string);
     destructor  Destroy; override;
 
-    // Ouvre un onglet. Le dataset retourné est à libérer par l'appelant.
     function OpenSheet(const ASheetName: string): TADODataSet;
-
-    // Liste les onglets disponibles dans le classeur
     function GetSheetNames: TArray<string>;
   end;
-
-// ── Accesseurs de cellules sûrs ─────────────────────────────────────────────
-// Gèrent NULL, type incorrecte, cellule absente sans lever d'exception.
 
 function XlStr  (DS: TDataSet; const ACol: string; const ADefault: string   = ''   ): string;
 function XlInt  (DS: TDataSet; const ACol: string; ADefault: Integer         = 0    ): Integer;
 function XlFloat(DS: TDataSet; const ACol: string; ADefault: Double          = 0    ): Double;
 function XlDate (DS: TDataSet; const ACol: string; ADefault: TDateTime       = 0    ): TDateTime;
 function XlBool (DS: TDataSet; const ACol: string; ADefault: Boolean         = False): Boolean;
-
-// Normalise pour comparaison / utilisation comme clé de lookup :
-// Trim + UpperCase + suppression des espaces multiples
 function XlKey(DS: TDataSet; const ACol: string): string;
 
 implementation
 
 uses
   System.StrUtils, ADODB;
-
-{ TExcelReader }
 
 constructor TExcelReader.Create(const AFilename: string);
 begin
@@ -69,7 +58,6 @@ end;
 
 function TExcelReader.BuildConnectionString: string;
 begin
-  // ACE 12 lit .xls ET .xlsx ; IMEX=1 force la lecture mixte (texte + nombre)
   Result := Format(
     'Provider=Microsoft.ACE.OLEDB.12.0;Data Source=%s;' +
     'Extended Properties="Excel 12.0;HDR=YES;IMEX=1"',
@@ -80,7 +68,6 @@ function TExcelReader.OpenSheet(const ASheetName: string): TADODataSet;
 var
   LRef: string;
 begin
-  // ADO référence les feuilles comme [NomFeuille$]
   if ASheetName.EndsWith('$') then
     LRef := '[' + ASheetName + ']'
   else
@@ -107,7 +94,6 @@ begin
   try
     LSchema := TADODataSet.Create(nil);
     try
-      // adSchemaTables = 20
       LSchema.Recordset :=
         (FConnection.ConnectionObject as _Connection)
           .OpenSchema(20, EmptyParam, EmptyParam);
@@ -115,7 +101,7 @@ begin
       begin
         LName := LSchema.FieldByName('TABLE_NAME').AsString;
         if LName.EndsWith('$') then
-          LNames.Add(Copy(LName, 1, Length(LName) - 1)); // sans le $
+          LNames.Add(Copy(LName, 1, Length(LName) - 1));
         LSchema.Next;
       end;
     finally
@@ -126,8 +112,6 @@ begin
     LNames.Free;
   end;
 end;
-
-{ Accesseurs }
 
 function XlStr(DS: TDataSet; const ACol: string; const ADefault: string): string;
 var

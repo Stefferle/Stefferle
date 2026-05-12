@@ -10,27 +10,20 @@ uses
   ImportTypes, ImportLog;
 
 type
-  // Dictionnaire clé-Excel (string) → ID base (integer) pour une entité donnée
   TKeyMap = TDictionary<string, Integer>;
 
   TImportContext = class
   private
     FConnection: TFDConnection;
     FLog       : TImportLog;
-    // Nom-entité → son TKeyMap  (ex: 'Fournisseur', 'Client', ...)
     FKeyMaps   : TObjectDictionary<string, TKeyMap>;
     function GetOrCreateMap(const AEntity: string): TKeyMap;
   public
     constructor Create(AConnection: TFDConnection; ALog: TImportLog);
     destructor  Destroy; override;
 
-    // Après chaque INSERT : enregistre le mapping clé-Excel → ID base
     procedure RegisterKey(const AEntity, AExcelKey: string; ADbId: Integer);
-
-    // Avant chaque écriture de FK : résout clé-Excel → ID base (-1 si absent)
     function ResolveKey(const AEntity, AExcelKey: string): Integer;
-
-    // Vrai si la clé a déjà été traitée (détection doublons)
     function KeyExists(const AEntity, AExcelKey: string): Boolean;
 
     property Connection: TFDConnection read FConnection;

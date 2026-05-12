@@ -2,13 +2,6 @@ unit ImportOrchestrator;
 
 {$SCOPEDENUMS ON}
 
-{
-  Orchestre tous les importeurs dans le bon ordre de dépendances.
-  Pour ajouter un nouvel importeur :
-    1. Ajouter son unit dans la clause uses
-    2. Instancier et appeler RunImporter dans Execute, au bon endroit
-}
-
 interface
 
 uses
@@ -70,15 +63,12 @@ var
 begin
   FTotalErrors := 0;
 
-  // ── Engagements EJ ────────────────────────────────────────────────────────
   LImporter := TImportEngagements.Create(FContext, FDataPath + 'EJ.xlsx');
   try RunImporter(LImporter); finally LImporter.Free; end;
 
-  // ── Marchés (après EJ pour la résolution FK) ──────────────────────────────
   // LImporter := TImportMarches.Create(FContext, FDataPath + 'MAR.xlsx');
   // try RunImporter(LImporter); finally LImporter.Free; end;
 
-  // ── Accords-Cadres ────────────────────────────────────────────────────────
   // LImporter := TImportAccordsCadres.Create(FContext, FDataPath + 'AC.xlsx');
   // try RunImporter(LImporter); finally LImporter.Free; end;
 
