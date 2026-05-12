@@ -24,9 +24,9 @@ implementation
 
 uses
   ImportTypes,
+  ImportMarches,
   ImportEngagements
   // À ajouter ultérieurement :
-  // ImportMarches,
   // ImportAccordsCadres,
   ;
 
@@ -63,11 +63,11 @@ var
 begin
   FTotalErrors := 0;
 
-  LImporter := TImportEngagements.Create(FContext, FDataPath + 'EJ.xlsx');
+  LImporter := TImportMarches.Create(FContext, FDataPath + 'MAR.xlsx');
   try RunImporter(LImporter); finally LImporter.Free; end;
 
-  // LImporter := TImportMarches.Create(FContext, FDataPath + 'MAR.xlsx');
-  // try RunImporter(LImporter); finally LImporter.Free; end;
+  LImporter := TImportEngagements.Create(FContext, FDataPath + 'EJ.xlsx');
+  try RunImporter(LImporter); finally LImporter.Free; end;
 
   // LImporter := TImportAccordsCadres.Create(FContext, FDataPath + 'AC.xlsx');
   // try RunImporter(LImporter); finally LImporter.Free; end;

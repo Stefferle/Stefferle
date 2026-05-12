@@ -4,22 +4,23 @@ unit ImportEngagements;
 
 {
   Import: EJ.xlsx  →  GO_ENTETE (DOCUMENT='EN') + GO_LIGNES
-  Dépendances : aucune pour l'instant (MARCHE = NULL, résolu lors de l'import MAR)
+  Dépendances : ImportMarches doit être exécuté avant (fournit KM_MAR)
 
-  Structure EJ :
-    - Un ID_EJ unique  →  1 GO_ENTETE (DOCUMENT='EN', LOT=0 ou LOT++ si avenant)
-    - N lignes Excel pour cet ID_EJ  →  N GO_LIGNES (NUMERO séquentiel global sur CHRONO)
+  Structure EJ avec marché :
+    - LOT=0  = record marché (ImportMarches)
+    - LOT=1,2,... = EJ appartenant au marché, originals d'abord puis avenants
+
+  Structure EJ sans marché (ID_MA=-1) :
+    - LOT=0  = EJ original, LOT=1,2,... = avenants (pivot : NUMERO_PIECE)
 
   Gestion des avenants (Avenant_O/N = 'OUI') :
-    - L'avenant partage le CHRONO de l'EJ original (pivot : NUMERO_PIECE)
-    - LOT : original=0, avenant1=1, avenant2=2, ...
-    - ENGAGEMENT_LIEN de l'avenant = ENGAGEMENT du GO_ENTETE original
-    - Import en 2 passes : originaux d'abord, avenants ensuite
+    - ENGAGEMENT_LIEN = ENGAGEMENT du GO_ENTETE original (via NUMERO_PIECE)
+    - Valeur majoritaire par groupe si flags incohérents
 
   Anomalies connues dans la source :
     - NUMERO_PIECE='1','2','3' : des centaines d'ID_EJ avec le même numéro → loggés
     - 379 ID_EJ avec flags Avenant incohérents entre leurs lignes → on prend la valeur majoritaire
-    - 4 ID_MA et 26 ID_AC orphelins → FK laissée à NULL avec WARN
+    - 4 ID_MA et 26 ID_AC orphelins → loggés, CHRONO propre affecté
 }
 
 interface
@@ -60,6 +61,7 @@ const
 
   KM_EJ       = 'EJ';
   KM_EJMETA   = 'EJMeta';
+  KM_MAR      = 'Marche';
 
   ANOMALOUS_PIECES : array[0..2] of string = ('1', '2', '3');
 
@@ -359,8 +361,11 @@ var
   LLot        : Integer;
   LStartNum   : Integer;
   LPiece      : string;
-  LIsAvenant  : Boolean;
-  LOuiCount   : Integer;
+  LIsAvenant        : Boolean;
+  LOuiCount         : Integer;
+  LMarcheChrono     : Integer;
+  LMarcheNextLot    : TDictionary<Integer, Integer>;
+  LMarcheNextNumero : TDictionary<Integer, Integer>;
 
 begin
   PreloadDossiers;
@@ -409,6 +414,8 @@ begin
             else Result := 0;
           end));
 
+        LMarcheNextLot    := TDictionary<Integer, Integer>.Create;
+        LMarcheNextNumero := TDictionary<Integer, Integer>.Create;
         LPieceMap := TDictionary<string, TEngRef>.Create;
         try
           InTransaction(procedure
@@ -430,38 +437,87 @@ begin
               LTVACle  := LookupTVA(LTauxTVA);
               LStatut  := MapStatut(LLine.Statut);
 
-              if LIsAvenant and not IsAnomalousPiece(LPiece)
-                and LPieceMap.TryGetValue(LPiece, LRef) then
+              // Déterminer si cet EJ appartient à un marché déjà importé
+              LMarcheChrono := -1;
+              if LLine.IdMA > 0 then
+                LMarcheChrono := FContext.ResolveKey(KM_MAR, IntToStr(LLine.IdMA));
+
+              if LMarcheChrono > 0 then
               begin
-                LChrono     := LRef.Chrono;
-                LLot        := LRef.NextLot;
-                LEngLien    := LRef.Engagement;
+                // EJ rattaché à un marché : partage le CHRONO du marché, LOT séquentiel
+                LChrono     := LMarcheChrono;
                 LEngagement := GoNextChrono(FContext.Connection, DOC_TYPE);
-                LStartNum   := LRef.NextNumero;
-                LRef.NextLot    := LRef.NextLot + 1;
-                LRef.NextNumero := LRef.NextNumero + LGrp.Count;
-                LPieceMap.AddOrSetValue(LPiece, LRef);
-                LogRow(IntToStr(LCurId),
-                  Format('Avenant LOT=%d sur CHRONO=%d (pièce=%s)', [LLot, LChrono, LPiece]));
+
+                if not LMarcheNextLot.TryGetValue(LLine.IdMA, LLot) then
+                  LLot := 1;
+                LMarcheNextLot.AddOrSetValue(LLine.IdMA, LLot + 1);
+
+                if not LMarcheNextNumero.TryGetValue(LLine.IdMA, LStartNum) then
+                  LStartNum := 1;
+                LMarcheNextNumero.AddOrSetValue(LLine.IdMA, LStartNum + LGrp.Count);
+
+                if LIsAvenant and not IsAnomalousPiece(LPiece)
+                  and LPieceMap.TryGetValue(LPiece, LRef) then
+                begin
+                  LEngLien := LRef.Engagement;
+                  LogRow(IntToStr(LCurId),
+                    Format('Avenant LOT=%d sur marché CHRONO=%d (pièce=%s)',
+                      [LLot, LChrono, LPiece]));
+                end
+                else
+                  LEngLien := -1;
+
+                // Enregistrer les originaux pour que leurs avenants trouvent ENGAGEMENT_LIEN
+                if not LIsAvenant and not IsAnomalousPiece(LPiece) then
+                begin
+                  LRef.Chrono     := LMarcheChrono;
+                  LRef.Engagement := LEngagement;
+                  LRef.NextLot    := 0;
+                  LRef.NextNumero := 0;
+                  LPieceMap.AddOrSetValue(LPiece, LRef);
+                end;
               end
               else
               begin
-                LChrono     := GoNextChrono(FContext.Connection, '-1');
-                LEngagement := GoNextChrono(FContext.Connection, DOC_TYPE);
-                LLot        := 0;
-                LEngLien    := -1;
-                LStartNum   := 1;
-                if LIsAvenant then
+                // EJ sans marché (ou marché orphelin) : logique avenant autonome
+                if LLine.IdMA > 0 then
                   LogRow(IntToStr(LCurId),
-                    Format('Avenant sans original connu (pièce=%s) → inséré LOT=0', [LPiece]),
-                    TLogLevel.Warning);
-                if not IsAnomalousPiece(LPiece) then
+                    Format('ID_MA=%d absent de la keymap marchés → CHRONO propre',
+                      [LLine.IdMA]), TLogLevel.Warning);
+
+                if LIsAvenant and not IsAnomalousPiece(LPiece)
+                  and LPieceMap.TryGetValue(LPiece, LRef) then
                 begin
-                  LRef.Chrono     := LChrono;
-                  LRef.Engagement := LEngagement;
-                  LRef.NextLot    := 1;
-                  LRef.NextNumero := LGrp.Count + 1;
+                  LChrono     := LRef.Chrono;
+                  LLot        := LRef.NextLot;
+                  LEngLien    := LRef.Engagement;
+                  LEngagement := GoNextChrono(FContext.Connection, DOC_TYPE);
+                  LStartNum   := LRef.NextNumero;
+                  LRef.NextLot    := LRef.NextLot + 1;
+                  LRef.NextNumero := LRef.NextNumero + LGrp.Count;
                   LPieceMap.AddOrSetValue(LPiece, LRef);
+                  LogRow(IntToStr(LCurId),
+                    Format('Avenant LOT=%d sur CHRONO=%d (pièce=%s)', [LLot, LChrono, LPiece]));
+                end
+                else
+                begin
+                  LChrono     := GoNextChrono(FContext.Connection, '-1');
+                  LEngagement := GoNextChrono(FContext.Connection, DOC_TYPE);
+                  LLot        := 0;
+                  LEngLien    := -1;
+                  LStartNum   := 1;
+                  if LIsAvenant then
+                    LogRow(IntToStr(LCurId),
+                      Format('Avenant sans original connu (pièce=%s) → inséré LOT=0', [LPiece]),
+                      TLogLevel.Warning);
+                  if not IsAnomalousPiece(LPiece) then
+                  begin
+                    LRef.Chrono     := LChrono;
+                    LRef.Engagement := LEngagement;
+                    LRef.NextLot    := 1;
+                    LRef.NextNumero := LGrp.Count + 1;
+                    LPieceMap.AddOrSetValue(LPiece, LRef);
+                  end;
                 end;
               end;
 
@@ -483,6 +539,8 @@ begin
           end);
         finally
           LPieceMap.Free;
+          LMarcheNextNumero.Free;
+          LMarcheNextLot.Free;
         end;
       finally
         LGroups.Free;
