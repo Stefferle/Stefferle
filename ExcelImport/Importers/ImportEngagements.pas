@@ -186,6 +186,15 @@ begin
   end;
 end;
 
+function IsAnomalousPiece(const P: string): Boolean;
+var
+  S: string;
+begin
+  for S in ANOMALOUS_PIECES do
+    if P = S then Exit(True);
+  Result := False;
+end;
+
 function ReadLine(DS: TDataSet): TEJLine;
 begin
   Result.CodeOpe             := XlKey(DS, 'CODE_OPE');
@@ -326,7 +335,6 @@ var
   LExcel    : TExcelReader;
   LSheet    : TDataSet;
   LLine     : TEJLine;
-  I         : Integer;
   LGroups   : TObjectDictionary<Integer, TEJGroup>;
   LIdOrder  : TList<Integer>;
   LGrp      : TEJGroup;
@@ -353,14 +361,6 @@ var
   LPiece      : string;
   LIsAvenant  : Boolean;
   LOuiCount   : Integer;
-
-  function IsAnomalousPiece(const P: string): Boolean;
-  var S: string;
-  begin
-    for S in ANOMALOUS_PIECES do
-      if P = S then Exit(True);
-    Result := False;
-  end;
 
 begin
   PreloadDossiers;
@@ -413,15 +413,15 @@ begin
         try
           InTransaction(procedure
           begin
-            for LIdEJ in LIdOrder do
+            for var LCurId in LIdOrder do
             begin
-              LGroups.TryGetValue(LIdEJ, LGrp);
+              LGroups.TryGetValue(LCurId, LGrp);
               if LGrp.Count = 0 then Continue;
               LLine := LGrp[0];
 
               LOuiCount := 0;
-              for I := 0 to LGrp.Count - 1 do
-                if LGrp[I].EstAvenant then Inc(LOuiCount);
+              for var II := 0 to LGrp.Count - 1 do
+                if LGrp[II].EstAvenant then Inc(LOuiCount);
               LIsAvenant := (LOuiCount * 2) >= LGrp.Count;
 
               LPiece   := LLine.NumeroPiece;
@@ -441,7 +441,7 @@ begin
                 LRef.NextLot    := LRef.NextLot + 1;
                 LRef.NextNumero := LRef.NextNumero + LGrp.Count;
                 LPieceMap.AddOrSetValue(LPiece, LRef);
-                LogRow(IntToStr(LIdEJ),
+                LogRow(IntToStr(LCurId),
                   Format('Avenant LOT=%d sur CHRONO=%d (pièce=%s)', [LLot, LChrono, LPiece]));
               end
               else
@@ -452,7 +452,7 @@ begin
                 LEngLien    := -1;
                 LStartNum   := 1;
                 if LIsAvenant then
-                  LogRow(IntToStr(LIdEJ),
+                  LogRow(IntToStr(LCurId),
                     Format('Avenant sans original connu (pièce=%s) → inséré LOT=0', [LPiece]),
                     TLogLevel.Warning);
                 if not IsAnomalousPiece(LPiece) then
@@ -469,13 +469,13 @@ begin
                 InsertGroup(FContext, LGrp,
                   LChrono, LLot, LEngagement, LEngLien, LStartNum,
                   LDossier, LTVACle, LTauxTVA, LStatut);
-                FContext.RegisterKey(KM_EJ,    IntToStr(LIdEJ), LChrono);
-                FContext.RegisterKey(KM_EJMETA, IntToStr(LIdEJ), LEngagement);
+                FContext.RegisterKey(KM_EJ,    IntToStr(LCurId), LChrono);
+                FContext.RegisterKey(KM_EJMETA, IntToStr(LCurId), LEngagement);
                 Inc(FStats.Inserted);
               except
                 on E: Exception do
                 begin
-                  LogRow(IntToStr(LIdEJ), 'Erreur INSERT: ' + E.Message, TLogLevel.Error);
+                  LogRow(IntToStr(LCurId), 'Erreur INSERT: ' + E.Message, TLogLevel.Error);
                   Inc(FStats.Errors);
                 end;
               end;
