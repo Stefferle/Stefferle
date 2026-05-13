@@ -53,7 +53,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.UITypes;
+  System.UITypes, Winapi.ActiveX;
 
 { TFormMain }
 
@@ -188,6 +188,8 @@ begin
     LErrors      : Integer;
     LLogFile     : string;
   begin
+    OleInitialize(nil);
+    try
     LLogFile := IncludeTrailingPathDelimiter(LDataPath) +
       FormatDateTime('yyyymmdd_hhnnss', Now) + '_import.log';
     LLog := TImportLog.Create(LLogFile);
@@ -234,6 +236,9 @@ begin
 
     finally
       LLog.Free;
+    end;
+    finally
+      OleUninitialize;
     end;
   end).Start;
 end;
